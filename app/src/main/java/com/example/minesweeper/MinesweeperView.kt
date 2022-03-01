@@ -66,8 +66,9 @@ class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, a
             for (j in 0..4) {
                 val tX = (i * width / 5).toFloat()
                 val tY = (j * height / 5).toFloat()
+                val content = MinesweeperModel.getFieldContent(i, j)
 
-                when (MinesweeperModel.getFieldContent(i, j)) {
+                when (content) {
                     MinesweeperModel.MINE -> canvas.drawText(MinesweeperModel.MINE.toString(), tX, tY, paintText)
                     MinesweeperModel.ONE -> canvas.drawText(MinesweeperModel.ONE.toString(), tX, tY, paintText)
                     MinesweeperModel.TWO -> canvas.drawText(MinesweeperModel.TWO.toString(), tX, tY, paintText)
@@ -86,6 +87,7 @@ class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, a
         MinesweeperModel.resetBoard()
         MinesweeperModel.setMines()
         MinesweeperModel.setCellCount()
+        // draws the updated board
         invalidate()
     }
 
