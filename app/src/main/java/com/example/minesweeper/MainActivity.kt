@@ -14,8 +14,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.minesweeperView.resetGame()
+
         binding.btnReset.setOnClickListener {
             binding.minesweeperView.resetGame()
         }
+
     }
 }

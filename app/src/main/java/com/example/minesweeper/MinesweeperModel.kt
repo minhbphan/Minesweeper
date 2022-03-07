@@ -3,17 +3,13 @@ package com.example.minesweeper
 import kotlin.random.Random
 
 object MinesweeperModel {
+
     // TODO: Naming conventions for constants
     // possible content of cells
     val BLANK: Short = 0
     val ONE: Short = 1
     val TWO: Short = 2
     val THREE: Short = 3
-    val FOUR: Short = 4
-    val FIVE: Short = 5
-    val SIX: Short = 6
-    val SEVEN: Short = 7
-    val EIGHT: Short = 8
     val MINE: Short = 9
 
     // interactions with the cells
@@ -57,15 +53,19 @@ object MinesweeperModel {
     * */
     fun setMines() {
         var mineCount = 3
-        for (i in 0..4) {
-            for (j in 0..4) {
-                if ((Random(System.currentTimeMillis()).nextInt(2) == 1)
-                    && (mineCount > 0)) {
-                    setFieldContent(i, j, MINE)
-                    mineCount--
+        // ensures that exactly 3 mines are planted
+        while (mineCount > 0) {
+            for (i in 0..4) {
+                for (j in 0..4) {
+                    if ((Random(System.currentTimeMillis()).nextInt(10) == 1)
+                        && (mineCount > 0) && (getFieldContent(i,j) == BLANK)) {
+                        setFieldContent(i, j, MINE)
+                        mineCount--
+                    }
                 }
             }
         }
+
     }
 
     // Sets the count of surrounding mines for each cell
@@ -76,8 +76,6 @@ object MinesweeperModel {
                     var mineCounter = 0
 
                     // horizontal & vertical checks
-                    if (i > 0 && getFieldContent(i-1,j) == MINE) { mineCounter++ }
-
                     if (i > 0 && getFieldContent(i-1, j) == MINE) { mineCounter++ }
                     if (j > 0 && getFieldContent(i, j-1) == MINE) { mineCounter++ }
                     if (i < 4 && getFieldContent(i+1, j) == MINE) { mineCounter++ }
@@ -106,13 +104,15 @@ object MinesweeperModel {
         setCoverContent(x, y, interaction)
     }
 
+    // TODO: check for game end state (hits a mine or reveals the board)
+
     /*
     * GETTERS + SETTERS
     * */
     fun getFieldContent(x: Int, y: Int) = field[x][y]
-    fun setFieldContent(x: Int, y: Int, content: Short) { field[x][y] = content }
+    private fun setFieldContent(x: Int, y: Int, content: Short) { field[x][y] = content }
     fun getCoverContent(x: Int, y: Int) = cover[x][y]
-    fun setCoverContent(x: Int, y: Int, content: Short) { cover[x][y] = content }
+    private fun setCoverContent(x: Int, y: Int, content: Short) { cover[x][y] = content }
 
 
 
