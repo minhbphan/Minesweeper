@@ -4,6 +4,8 @@ import kotlin.random.Random
 
 object MinesweeperModel {
 
+    var gameEnd = false
+
     // TODO: Naming conventions for constants
     // possible content of cells
     val BLANK: Short = 0
@@ -15,12 +17,11 @@ object MinesweeperModel {
     // interactions with the cells
     val REVEAL : Short = 10
     val FLAG : Short = 11
-    private var interaction = REVEAL    // default interaction is to reveal cell
+    var interaction = REVEAL    // default interaction is to reveal cell
 
     // possible states of each cell
     val CLICKED : Short = 12
     val UNCLICKED : Short = 13
-
 
     private val field = arrayOf(
         shortArrayOf(BLANK, BLANK, BLANK, BLANK, BLANK),
@@ -93,15 +94,11 @@ object MinesweeperModel {
         }
     }
 
-
-
     fun reveal(x: Int, y: Int) {
-        interaction = REVEAL
-        setCoverContent(x, y, interaction)
+        setCoverContent(x, y, REVEAL)
     }
-    fun flag(x: Int, y: Int) {
-        interaction = FLAG
-        setCoverContent(x, y, interaction)
+    fun flagOrUnflag(x: Int, y: Int, mode: Short) {
+        setCoverContent(x, y, mode)
     }
 
     // TODO: check for game end state (hits a mine or reveals the board)
@@ -112,8 +109,8 @@ object MinesweeperModel {
     fun getFieldContent(x: Int, y: Int) = field[x][y]
     private fun setFieldContent(x: Int, y: Int, content: Short) { field[x][y] = content }
     fun getCoverContent(x: Int, y: Int) = cover[x][y]
-    private fun setCoverContent(x: Int, y: Int, content: Short) { cover[x][y] = content }
-
+    fun setCoverContent(x: Int, y: Int, content: Short) { cover[x][y] = content }
+    fun setEndState(endState: Boolean) { gameEnd = endState }
 
 
 }
