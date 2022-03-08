@@ -8,20 +8,20 @@ object MinesweeperModel {
 
     // TODO: Naming conventions for constants
     // possible content of cells
-    val BLANK: Short = 0
-    val ONE: Short = 1
-    val TWO: Short = 2
-    val THREE: Short = 3
-    val MINE: Short = 9
+    private const val BLANK: Short = 0
+    const val ONE: Short = 1
+    const val TWO: Short = 2
+    const val THREE: Short = 3
+    const val MINE: Short = 9
 
     // interactions with the cells
-    val REVEAL : Short = 10
-    val FLAG : Short = 11
+    const val REVEAL : Short = 10
+    const val FLAG : Short = 11
     var interaction = REVEAL    // default interaction is to reveal cell
 
     // possible states of each cell
-    val CLICKED : Short = 12
-    val UNCLICKED : Short = 13
+    const val SHOWN : Short = 12
+    const val HIDDEN : Short = 13
 
     private val field = arrayOf(
         shortArrayOf(BLANK, BLANK, BLANK, BLANK, BLANK),
@@ -29,23 +29,25 @@ object MinesweeperModel {
         shortArrayOf(BLANK, BLANK, BLANK, BLANK, BLANK),
         shortArrayOf(BLANK, BLANK, BLANK, BLANK, BLANK),
         shortArrayOf(BLANK, BLANK, BLANK, BLANK, BLANK))
-
     private val cover = arrayOf(
-        shortArrayOf(UNCLICKED, UNCLICKED, UNCLICKED, UNCLICKED, UNCLICKED),
-        shortArrayOf(UNCLICKED, UNCLICKED, UNCLICKED, UNCLICKED, UNCLICKED),
-        shortArrayOf(UNCLICKED, UNCLICKED, UNCLICKED, UNCLICKED, UNCLICKED),
-        shortArrayOf(UNCLICKED, UNCLICKED, UNCLICKED, UNCLICKED, UNCLICKED),
-        shortArrayOf(UNCLICKED, UNCLICKED, UNCLICKED, UNCLICKED, UNCLICKED))
+        shortArrayOf(HIDDEN, HIDDEN, HIDDEN, HIDDEN, HIDDEN),
+        shortArrayOf(HIDDEN, HIDDEN, HIDDEN, HIDDEN, HIDDEN),
+        shortArrayOf(HIDDEN, HIDDEN, HIDDEN, HIDDEN, HIDDEN),
+        shortArrayOf(HIDDEN, HIDDEN, HIDDEN, HIDDEN, HIDDEN),
+        shortArrayOf(HIDDEN, HIDDEN, HIDDEN, HIDDEN, HIDDEN))
+
+    private var flagRemaining: Int = 3
 
     // resets the game
     fun resetBoard() {
         for (i in 0..4) {
             for (j in 0..4) {
                 setFieldContent(i, j, BLANK)
-                setCoverContent(i, j, UNCLICKED)
+                setCoverContent(i, j, HIDDEN)
             }
         }
         interaction = REVEAL
+        flagRemaining = 3
     }
 
     /*
@@ -94,11 +96,21 @@ object MinesweeperModel {
         }
     }
 
-    fun reveal(x: Int, y: Int) {
-        setCoverContent(x, y, REVEAL)
+    fun winningUncovered() : Boolean {
+        for (i in 0..4) {
+            for (j in 0..4) {
+                if (getCoverContent(i, j) == HIDDEN) return false
+            }
+        }
+        return true
     }
-    fun flagOrUnflag(x: Int, y: Int, mode: Short) {
-        setCoverContent(x, y, mode)
+
+    fun removeCover() {
+        for (i in 0..4) {
+            for (j in 0..4) {
+                setCoverContent(i, j, SHOWN)
+            }
+        }
     }
 
     // TODO: check for game end state (hits a mine or reveals the board)
@@ -111,6 +123,7 @@ object MinesweeperModel {
     fun getCoverContent(x: Int, y: Int) = cover[x][y]
     fun setCoverContent(x: Int, y: Int, content: Short) { cover[x][y] = content }
     fun setEndState(endState: Boolean) { gameEnd = endState }
-
+    fun getflagRemaining() = flagRemaining
+    fun setflagRemaining(count: Int) {flagRemaining = count}
 
 }

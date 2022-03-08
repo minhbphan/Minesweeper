@@ -6,7 +6,6 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import com.google.android.material.snackbar.Snackbar
 
 class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     // needs a paint object to draw on canvas
@@ -95,8 +94,8 @@ class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, a
                 val tY = (j * height / 5).toFloat()
 
                 when (MinesweeperModel.getCoverContent(i, j)) {
-                    MinesweeperModel.UNCLICKED -> canvas.drawRect(tX, tY, tX + (width / 5), tY + (height / 5),paintCover)
-                    MinesweeperModel.CLICKED -> canvas.drawRect(tX, tY, tX + (width / 5), tY + (height / 5),paintEmpty)
+                    MinesweeperModel.HIDDEN -> canvas.drawRect(tX, tY, tX + (width / 5), tY + (height / 5),paintCover)
+                    MinesweeperModel.SHOWN -> canvas.drawRect(tX, tY, tX + (width / 5), tY + (height / 5),paintEmpty)
                     MinesweeperModel.FLAG ->  {
                         canvas.drawRect(tX, tY, tX + (width / 5), tY + (height / 5),paintCover)
                         canvas.drawBitmap(bitmapFlag, tX + (width / 50), tY, null)
@@ -124,7 +123,7 @@ class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, a
     // Ends game
     private fun endGame() {
         // if nothing left, wins game
-        if (checkUncovered()) {
+        if (MinesweeperModel.winningUncovered()) {
             Log.i(null, "You won!")
             //MainActivity.snackBarMsg("You won!")
         } else {
@@ -132,25 +131,8 @@ class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, a
             Log.i(null, "You lost :(")
         }
         MinesweeperModel.setEndState(true)
-        removeCover()
+        MinesweeperModel.removeCover()
         invalidate()
-    }
-
-    private fun checkUncovered() : Boolean {
-        for (i in 0..4) {
-            for (j in 0..4) {
-                if (MinesweeperModel.getCoverContent(i, j) == MinesweeperModel.UNCLICKED) return false
-            }
-        }
-        return false
-    }
-
-    private fun removeCover() {
-        for (i in 0..4) {
-            for (j in 0..4) {
-                MinesweeperModel.setCoverContent(i, j, MinesweeperModel.CLICKED)
-            }
-        }
     }
 
     fun resetGame() {
@@ -172,44 +154,52 @@ class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, a
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if ((event?.action == MotionEvent.ACTION_DOWN) && (!MinesweeperModel.gameEnd)) {
+        if ((event?.action == MotionEvent.ACTION_DOWN) && !(MinesweeperModel.gameEnd)) {
             val tX = event.x.toInt() / (width / 5)
             val tY = event.y.toInt() / (height / 5)
 
             // hit a bomb -> end game
             if ((tX < 5 && tY < 5) &&
                 (MinesweeperModel.getFieldContent(tX, tY) == MinesweeperModel.MINE) &&
-                            (MinesweeperModel.interaction == MinesweeperModel.REVEAL)) {
+                (MinesweeperModel.interaction == MinesweeperModel.REVEAL)) {
                 endGame()
             }
 
+            // Revealing or flagging a covered cell
             if ((tX < 5 && tY < 5) &&
-                (MinesweeperModel.getCoverContent(tX, tY) == MinesweeperModel.UNCLICKED)) {
-                            MinesweeperModel.setCoverContent(tX, tY, MinesweeperModel.interaction)
-
-//                if (MinesweeperModel.interaction == MinesweeperModel.REVEAL) {
-//                    MinesweeperModel.reveal(tX, tY)
-//                } else {
-//                    MinesweeperModel.flagOrUnflag(tX, tY, MinesweeperModel.FLAG)
-//                }
-
+                (MinesweeperModel.getCoverContent(tX, tY) == MinesweeperModel.HIDDEN)) {
+                if (MinesweeperModel.interaction == MinesweeperModel.REVEAL) {
+                    MinesweeperModel.setCoverContent(tX, tY, MinesweeperModel.REVEAL)
+                } else {
+                    val flagCount = MinesweeperModel.getflagRemaining()
+                    // only flag if there are flags remaining
+                    if (flagCount > 0) {
+                        MinesweeperModel.setCoverContent(tX, tY, MinesweeperModel.FLAG)
+                        MinesweeperModel.setflagRemaining(flagCount - 1)
+                    }
+                }
+                // MinesweeperModel.setCoverContent(tX, tY, MinesweeperModel.interaction)
                 invalidate()
             }
             // Unflagging
             else if ((tX < 5 && tY < 5) &&
                 (MinesweeperModel.getCoverContent(tX, tY) == MinesweeperModel.FLAG) &&
-                            (MinesweeperModel.interaction == MinesweeperModel.FLAG)) {
-                MinesweeperModel.setCoverContent(tX, tY, MinesweeperModel.UNCLICKED)
+                (MinesweeperModel.interaction == MinesweeperModel.FLAG)) {
+                val flagCount = MinesweeperModel.getflagRemaining()
+                MinesweeperModel.setflagRemaining(flagCount + 1)
+                MinesweeperModel.setCoverContent(tX, tY, MinesweeperModel.HIDDEN)
 
                 invalidate()
             }
 
-            // checks for game end state
-            if (checkUncovered()) {
+            // checks for winning game end state
+            if (MinesweeperModel.winningUncovered()) {
                 Log.i(null, "There's nothing left!")
                 endGame()
             }
+
         }
+
         return true
     }
 
