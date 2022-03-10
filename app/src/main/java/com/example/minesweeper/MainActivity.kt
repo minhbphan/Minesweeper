@@ -6,27 +6,25 @@ import com.example.minesweeper.databinding.ActivityMainBinding
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
-    lateinit var binding: ActivityMainBinding
-    // val mySB = Snackbar.make(binding.root, "Test Msg", Snackbar.LENGTH_LONG)
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-//        val mySB = Snackbar.make(binding.root, "Test Msg", Snackbar.LENGTH_LONG)
-//        mySB.setAction("Ok") {
-//            binding.msgDisplay.text = "SNACKBAR"
-//        }.show()
-
         // starts the game on default
         binding.minesweeperView.resetGame()
+        binding.score.text = getString(R.string.flags_remaining_label, 3)
+        snackBarMsg(getString(R.string.new_game))
 
+        // Resets the game on click of RESET button
         binding.btnReset.setOnClickListener {
             binding.minesweeperView.resetGame()
             binding.interactionToggle.isChecked = false
         }
 
+        // Handles the toggling for Reveal and Flag functionalities
         binding.interactionToggle.setOnCheckedChangeListener {_, isChecked ->
 //            if (isChecked) {
 //            // Flag mode
@@ -37,11 +35,15 @@ class MainActivity : AppCompatActivity() {
 //            }
             binding.minesweeperView.setFlagMode(isChecked)
         }
-
     }
 
-//    fun snackBarMsg(msg: String) {
-//        Snackbar.make(binding.root, msg, Snackbar.LENGTH_LONG).show()
-//    }
+    // Creates SnackBar messages
+    fun snackBarMsg(msg: String) {
+        Snackbar.make(binding.root, msg, Snackbar.LENGTH_LONG).show()
+    }
+    // updates the remaining flag count
+    fun updateRemainingFlags(score: Int) {
+        binding.score.text = getString(R.string.flags_remaining_label, score)
+    }
 
 }

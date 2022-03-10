@@ -17,9 +17,11 @@ object MinesweeperModel {
     // possible states of each cell
     const val SHOWN : Short = 12
     const val HIDDEN : Short = 13
+    // number of flags and mines
+    private const val COUNT : Int = 3
 
     var interaction = REVEAL    // default interaction is to reveal cell
-    private var flagRemaining: Int = 3
+    private var flagRemaining: Int = COUNT
     var gameEnd = false
 
     private val field = arrayOf(
@@ -46,10 +48,10 @@ object MinesweeperModel {
             }
         }
         interaction = REVEAL
-        flagRemaining = 3
+        flagRemaining = COUNT
     }
     fun setMines() {
-        var mineCount = 3
+        var mineCount = COUNT
         // ensures that exactly 3 mines are planted
         while (mineCount > 0) {
             for (i in 0..4) {

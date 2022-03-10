@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,50 +7,37 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-<!--    <TextView-->
-<!--        android:id="@+id/msgDisplay"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text=""-->
-<!--        android:textSize="28sp" />-->
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="MINESWEEPER"
+        android:text="@string/title"
         android:textSize="30sp" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/score"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="left"
+            android:gravity="start"
             android:padding="8sp"
-            android:text="0"
+            android:text="@string/flags_remaining_label"
             android:textSize="20sp" />
+
+        <Space
+            android:layout_width="70sp"
+            android:layout_height="wrap_content" />
 
         <Button
             android:id="@+id/btnReset"
             android:padding="8sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Reset"/>
-
-        <TextView
-            android:id="@+id/timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="right"
-            android:padding="8sp"
-            android:text="00:00"
-            android:textSize="20sp" />
+            android:text="@string/reset_label"/>
 
     </LinearLayout>
 
@@ -65,8 +51,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:checked="false"
-        android:layout_centerHorizontal="true"
-        android:textOff="Reveal"
-        android:textOn="Flag"/> <!--text to be displayed whenever toggle button is checked-->
+        android:textOff="@string/reveal_label"
+        android:textOn="@string/flag_label"/> <!--text to be displayed whenever toggle button is checked-->
 
 </LinearLayout>

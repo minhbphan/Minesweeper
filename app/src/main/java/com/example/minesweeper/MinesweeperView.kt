@@ -3,7 +3,6 @@ package com.example.minesweeper
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 
@@ -71,6 +70,7 @@ class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, a
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         // only allows interactions with the board if game hasn't ended
         if ((event?.action == MotionEvent.ACTION_DOWN) && !(MinesweeperModel.gameEnd)) {
+
             val tX = event.x.toInt() / (width / 5)
             val tY = event.y.toInt() / (height / 5)
 
@@ -79,6 +79,7 @@ class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, a
                 (MinesweeperModel.getFieldContent(tX, tY) == MinesweeperModel.MINE) &&
                 (MinesweeperModel.interaction == MinesweeperModel.REVEAL)) {
                 endGame()
+                return true
             }
 
             // SCENARIO 2: player either reveals a hidden cell OR
@@ -115,10 +116,11 @@ class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, a
             // after each move, check for
             // SCENARIO 4: player reveals/flags all cells, winning the game
             if (MinesweeperModel.winningUncovered()) {
-                Log.i(null, "There's nothing left!")
                 endGame()
             }
 
+            // updates with remaining flags
+            (context as MainActivity).updateRemainingFlags(MinesweeperModel.getflagRemaining())
         }
 
         return true
@@ -184,11 +186,9 @@ class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, a
     private fun endGame() {
         // if nothing left, wins game
         if (MinesweeperModel.winningUncovered()) {
-            Log.i(null, "You won!")
-            //MainActivity.snackBarMsg("You won!")
+            (context as MainActivity).snackBarMsg(context.getString(R.string.win_msg))
         } else {
-            // MainActivity.snackBarMsg("You lost :(")
-            Log.i(null, "You lost :(")
+            (context as MainActivity).snackBarMsg(context.getString(R.string.lose_msg))
         }
         MinesweeperModel.setEndState(true)
         MinesweeperModel.removeCover()
@@ -199,14 +199,18 @@ class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, a
         MinesweeperModel.resetBoard()
         MinesweeperModel.setMines()
         MinesweeperModel.setCellCount()
+        (context as MainActivity).updateRemainingFlags(MinesweeperModel.getflagRemaining())
+        (context as MainActivity).snackBarMsg(context.getString(R.string.new_game))
         // draws the clean board
         invalidate()
     }
     fun setFlagMode(flagOn : Boolean) {
         if (flagOn) {
             MinesweeperModel.interaction = MinesweeperModel.FLAG
+            (context as MainActivity).snackBarMsg(context.getString(R.string.flag_on))
         } else {
             MinesweeperModel.interaction = MinesweeperModel.REVEAL
+            (context as MainActivity).snackBarMsg(context.getString(R.string.flag_off))
         }
     }
 

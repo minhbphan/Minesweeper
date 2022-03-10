@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">Minesweeper</string>
+    <string name="log_nothing">There\'s nothing left!</string>
+    <string name="flag_off">Flagging mode OFF</string>
+    <string name="flag_on">Flagging mode ON</string>
+    <string name="new_game">New ga«me started</string>
+    <string name="win_msg">You won — congrats!</string>
+    <string name="lose_msg">You Lost :( Click RESET to try again!</string>
+    <string name="title">MINESWEEPER</string>
+    <string name="flags_remaining_label">Flags remaining: %d</string>
+    <string name="reset_label">Reset</string>
+    <string name="reveal_label">Reveal</string>
+    <string name="flag_label">Flag</string>
 </resources>
