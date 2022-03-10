@@ -4,24 +4,23 @@ import kotlin.random.Random
 
 object MinesweeperModel {
 
-    var gameEnd = false
-
-    // TODO: Naming conventions for constants
+    /* ***** CONSTANTS ***** */
     // possible content of cells
     private const val BLANK: Short = 0
     const val ONE: Short = 1
     const val TWO: Short = 2
     const val THREE: Short = 3
     const val MINE: Short = 9
-
     // interactions with the cells
     const val REVEAL : Short = 10
     const val FLAG : Short = 11
-    var interaction = REVEAL    // default interaction is to reveal cell
-
     // possible states of each cell
     const val SHOWN : Short = 12
     const val HIDDEN : Short = 13
+
+    var interaction = REVEAL    // default interaction is to reveal cell
+    private var flagRemaining: Int = 3
+    var gameEnd = false
 
     private val field = arrayOf(
         shortArrayOf(BLANK, BLANK, BLANK, BLANK, BLANK),
@@ -36,9 +35,9 @@ object MinesweeperModel {
         shortArrayOf(HIDDEN, HIDDEN, HIDDEN, HIDDEN, HIDDEN),
         shortArrayOf(HIDDEN, HIDDEN, HIDDEN, HIDDEN, HIDDEN))
 
-    private var flagRemaining: Int = 3
 
-    // resets the game
+    /* ***** SETUP FUNCTIONS: *****
+       ***** resets game, planting mines, setting adjacent mines count for cells ***** */
     fun resetBoard() {
         for (i in 0..4) {
             for (j in 0..4) {
@@ -49,11 +48,6 @@ object MinesweeperModel {
         interaction = REVEAL
         flagRemaining = 3
     }
-
-    /*
-    * SETUP:
-    * Plant mines
-    * */
     fun setMines() {
         var mineCount = 3
         // ensures that exactly 3 mines are planted
@@ -70,8 +64,6 @@ object MinesweeperModel {
         }
 
     }
-
-    // Sets the count of surrounding mines for each cell
     fun setCellCount() {
         for (i in 0..4) {
             for (j in 0..4) {
@@ -96,6 +88,7 @@ object MinesweeperModel {
         }
     }
 
+    // checks the winning state of the game (all cells are either uncovered or flagged)
     fun winningUncovered() : Boolean {
         for (i in 0..4) {
             for (j in 0..4) {
@@ -104,7 +97,7 @@ object MinesweeperModel {
         }
         return true
     }
-
+    // uncovers the board to show the field
     fun removeCover() {
         for (i in 0..4) {
             for (j in 0..4) {
@@ -113,11 +106,7 @@ object MinesweeperModel {
         }
     }
 
-    // TODO: check for game end state (hits a mine or reveals the board)
-
-    /*
-    * GETTERS + SETTERS
-    * */
+    /* ***** GETTERS & SETTERS ***** */
     fun getFieldContent(x: Int, y: Int) = field[x][y]
     private fun setFieldContent(x: Int, y: Int, content: Short) { field[x][y] = content }
     fun getCoverContent(x: Int, y: Int) = cover[x][y]
@@ -125,5 +114,4 @@ object MinesweeperModel {
     fun setEndState(endState: Boolean) { gameEnd = endState }
     fun getflagRemaining() = flagRemaining
     fun setflagRemaining(count: Int) {flagRemaining = count}
-
 }

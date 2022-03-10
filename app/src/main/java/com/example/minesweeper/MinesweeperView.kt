@@ -18,27 +18,33 @@ class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, a
     private var bitmapFlag: Bitmap
 
     init {
+        // background of the field
         paintBackground = Paint()
         paintBackground.color = Color.GRAY
         paintBackground.style = Paint.Style.FILL
 
+        // cover
         paintCover = Paint()
         paintCover.color = Color.LTGRAY
         paintCover.style = Paint.Style.FILL
 
+        // removes the cover
         paintEmpty = Paint()
         paintEmpty.color = Color.TRANSPARENT
         paintBackground.style = Paint.Style.FILL
 
+        // lines
         paintLine = Paint()
         paintLine.color = Color.WHITE
         paintLine.style = Paint.Style.STROKE
         paintLine.strokeWidth = 5f
 
+        // labels the adjacent mines count
         paintText = Paint()
         paintText.textSize = 100f
         paintText.color = Color.RED
 
+        // images of flags and mines
         bitmapMine = BitmapFactory.decodeResource(resources, R.drawable.mine)
         bitmapFlag = BitmapFactory.decodeResource(resources, R.drawable.flag)
 
@@ -62,10 +68,63 @@ class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, a
         drawCover(canvas)
     }
 
-    /*
-    * SETUP:
-    * Draws outline of the board: 4 vertical and 4 horizontal lines
-    * */
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        // only allows interactions with the board if game hasn't ended
+        if ((event?.action == MotionEvent.ACTION_DOWN) && !(MinesweeperModel.gameEnd)) {
+            val tX = event.x.toInt() / (width / 5)
+            val tY = event.y.toInt() / (height / 5)
+
+            // SCENARIO 1: player hits a bomb, end game (Lose)
+            if ((tX < 5 && tY < 5) &&
+                (MinesweeperModel.getFieldContent(tX, tY) == MinesweeperModel.MINE) &&
+                (MinesweeperModel.interaction == MinesweeperModel.REVEAL)) {
+                endGame()
+            }
+
+            // SCENARIO 2: player either reveals a hidden cell OR
+            // player places a flag on a suspected mine
+            if ((tX < 5 && tY < 5) &&
+                (MinesweeperModel.getCoverContent(tX, tY) == MinesweeperModel.HIDDEN)) {
+                    // Reveal mode
+                if (MinesweeperModel.interaction == MinesweeperModel.REVEAL) {
+                    MinesweeperModel.setCoverContent(tX, tY, MinesweeperModel.REVEAL)
+                }
+                    // Flag mode
+                else {
+                    val flagCount = MinesweeperModel.getflagRemaining()
+                    // only flag if there are flags remaining
+                    if (flagCount > 0) {
+                        MinesweeperModel.setCoverContent(tX, tY, MinesweeperModel.FLAG)
+                        MinesweeperModel.setflagRemaining(flagCount - 1)
+                    }
+                }
+                invalidate()
+            }
+
+            // SCENARIO 3: player unflags a cell that is currently flagged
+            else if ((tX < 5 && tY < 5) &&
+                (MinesweeperModel.getCoverContent(tX, tY) == MinesweeperModel.FLAG) &&
+                (MinesweeperModel.interaction == MinesweeperModel.FLAG)) {
+                val flagCount = MinesweeperModel.getflagRemaining()
+                MinesweeperModel.setflagRemaining(flagCount + 1)
+                MinesweeperModel.setCoverContent(tX, tY, MinesweeperModel.HIDDEN)
+
+                invalidate()
+            }
+
+            // after each move, check for
+            // SCENARIO 4: player reveals/flags all cells, winning the game
+            if (MinesweeperModel.winningUncovered()) {
+                Log.i(null, "There's nothing left!")
+                endGame()
+            }
+
+        }
+
+        return true
+    }
+
+    /* ***** SETUP: draws outline of the board (4 vertical and 4 horizontal lines) ***** */
     private fun drawGameArea(canvas: Canvas) {
         // border
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paintLine)
@@ -120,7 +179,8 @@ class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, a
         canvas.drawLine((4 * width / 5).toFloat(), 0f, (4 * width / 5).toFloat(), height.toFloat(), paintLine)
     }
 
-    // Ends game
+    /* ***** Helper Methods: functionality for ending and resetting game, *****
+       ***** setting appropriate interaction on cells (revealing or flagging) ***** */
     private fun endGame() {
         // if nothing left, wins game
         if (MinesweeperModel.winningUncovered()) {
@@ -134,17 +194,14 @@ class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, a
         MinesweeperModel.removeCover()
         invalidate()
     }
-
     fun resetGame() {
         MinesweeperModel.setEndState(false)
-
         MinesweeperModel.resetBoard()
         MinesweeperModel.setMines()
         MinesweeperModel.setCellCount()
         // draws the clean board
         invalidate()
     }
-
     fun setFlagMode(flagOn : Boolean) {
         if (flagOn) {
             MinesweeperModel.interaction = MinesweeperModel.FLAG
@@ -152,57 +209,5 @@ class MinesweeperView(context: Context?, attrs: AttributeSet?) : View(context, a
             MinesweeperModel.interaction = MinesweeperModel.REVEAL
         }
     }
-
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if ((event?.action == MotionEvent.ACTION_DOWN) && !(MinesweeperModel.gameEnd)) {
-            val tX = event.x.toInt() / (width / 5)
-            val tY = event.y.toInt() / (height / 5)
-
-            // hit a bomb -> end game
-            if ((tX < 5 && tY < 5) &&
-                (MinesweeperModel.getFieldContent(tX, tY) == MinesweeperModel.MINE) &&
-                (MinesweeperModel.interaction == MinesweeperModel.REVEAL)) {
-                endGame()
-            }
-
-            // Revealing or flagging a covered cell
-            if ((tX < 5 && tY < 5) &&
-                (MinesweeperModel.getCoverContent(tX, tY) == MinesweeperModel.HIDDEN)) {
-                if (MinesweeperModel.interaction == MinesweeperModel.REVEAL) {
-                    MinesweeperModel.setCoverContent(tX, tY, MinesweeperModel.REVEAL)
-                } else {
-                    val flagCount = MinesweeperModel.getflagRemaining()
-                    // only flag if there are flags remaining
-                    if (flagCount > 0) {
-                        MinesweeperModel.setCoverContent(tX, tY, MinesweeperModel.FLAG)
-                        MinesweeperModel.setflagRemaining(flagCount - 1)
-                    }
-                }
-                // MinesweeperModel.setCoverContent(tX, tY, MinesweeperModel.interaction)
-                invalidate()
-            }
-            // Unflagging
-            else if ((tX < 5 && tY < 5) &&
-                (MinesweeperModel.getCoverContent(tX, tY) == MinesweeperModel.FLAG) &&
-                (MinesweeperModel.interaction == MinesweeperModel.FLAG)) {
-                val flagCount = MinesweeperModel.getflagRemaining()
-                MinesweeperModel.setflagRemaining(flagCount + 1)
-                MinesweeperModel.setCoverContent(tX, tY, MinesweeperModel.HIDDEN)
-
-                invalidate()
-            }
-
-            // checks for winning game end state
-            if (MinesweeperModel.winningUncovered()) {
-                Log.i(null, "There's nothing left!")
-                endGame()
-            }
-
-        }
-
-        return true
-    }
-
-
 
 }
